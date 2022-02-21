@@ -1,8 +1,8 @@
 # Red-Social
 
-# Red Social Interactiva 
-
 Red social interactiva con estilo Blog.
+
+# Red Social Interactiva 
 
 El desarrollo complementa funcionabilidades reactivas y asincronas, sección para registrarse y loguearse, tiene validaciones básicas - intermedias para registro y login. Un usuario puede crear Publicaciones Multimedia, donde otros usuarios pueden solo leerla, ver detalles de la publicación, quien lo publicó y en que fecha lo hizo, los usuarios no propietarios pueden agregar un comentario a la publicación, el mismo se puede actualizar y eliminar. Pero solo el propietario de la publicación puede actualizarla ó eliminarla, al momento de eliminar la publicación, se eliminará los  comentarios de otros usuarios. 
 
