@@ -1,0 +1,224 @@
+<template>
+  <div>
+    <button
+      title="Regresar en el historial de navegación"
+      class="btn btn-secondary btn-regresar"
+      @click="$router.go(-1)"
+    >
+      <i class="fa-solid fa-arrow-left"></i> Regresar
+    </button>
+  </div>
+  <h1 class="center">Listado de amigos <i class="fa-solid fa-list"></i></h1>
+  <div class="container">
+    <template v-if="amigos && amigos.length">
+      <ul class="tabla-estilos">
+        <li class="table-header">
+          <div class="columna columna-1">
+            Foto <i class="fa-solid fa-image"></i>
+          </div>
+          <div class="columna columna-2">
+            Nombre / Sexo - F. Nacimiento
+            <i class="fa-solid fa-circle-user"></i>
+          </div>
+          <div class="columna columna-2">
+            Creado desde
+            <i class="fa-solid fa-calendar"></i>
+          </div>
+          <div class="columna columna-4">
+            Estado <i class="fa-solid fa-clock"></i>
+          </div>
+          <div class="columna columna-4">
+            Acción <i class="fa-solid fa-check"></i>
+          </div>
+        </li>
+        <div v-for="amigo in amigos" :key="amigo.id">
+          <li class="table-row">
+            <div class="columna columna-1" data-label="Foto">
+              <img
+                width="50"
+                :src="'http://localhost:3000/images/' + amigo.usuario_id.foto"
+                alt="Foto de perfil del usuario"
+              />
+            </div>
+            <div
+              class="columna columna-2"
+              data-label="Nombre / Sexo / F. Nacimiento"
+            >
+              {{ amigo.usuario_id.nombre }} / {{ amigo.usuario_id.sexo }} -
+              {{
+                new Date(amigo.usuario_id.fecha_nacimiento).toLocaleDateString()
+              }}
+            </div>
+            <div class="columna columna-2" data-label="Creado de">
+              {{ new Date(amigo.usuario_id.creado_el).toLocaleString() }}
+            </div>
+            <div class="columna columna-3" data-label="Estado">
+              <span class="amigos">Amigos </span>
+            </div>
+            <div class="columna columna-4" data-label="Acción">
+              <button
+                @click="eliminarAmigo(amigo.id)"
+                title="Eliminar amigo"
+                class="boton boton-eliminar"
+              >
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </li>
+        </div>
+      </ul>
+    </template>
+    <template v-else>
+      <p class="center gray">
+        No tienes amigos registrados actualmente
+        <i class="fa-solid fa-users-slash"></i>
+      </p>
+    </template>
+  </div>
+</template>
+
+<script>
+import Swal from "sweetalert2";
+import { obtenerAmigos, eliminarSolicitud } from "../servicios/amistades/index";
+export default {
+  name: "Amigos",
+  data() {
+    return {
+      amigos: [],
+    };
+  },
+  created() {
+    this.obtenerAmigosUsuario();
+  },
+  methods: {
+    mostrarAlertaMensaje(contenido, tipo) {
+      const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener("mouseenter", Swal.stopTimer);
+          toast.addEventListener("mouseleave", Swal.resumeTimer);
+        },
+      });
+      Toast.fire({
+        icon: tipo,
+        title: contenido,
+      });
+    },
+    async obtenerAmigosUsuario() {
+      try {
+        const response = await obtenerAmigos();
+        const { amigos } = await response.json();
+        this.amigos = amigos;
+      } catch (error) {
+        this.mostrarAlertaMensaje(
+          "Ocurrió un error obteniendo los amigos",
+          "error"
+        );
+      }
+    },
+    async eliminarAmigo(id) {
+      try {
+        const response = await eliminarSolicitud(id);
+        const { msg } = await response.json();
+        if (msg.includes("exitosamente")) {
+          this.mostrarAlertaMensaje(msg, "success");
+          this.obtenerAmigosUsuario();
+          return;
+        }
+        this.mostrarAlertaMensaje("No se pudo eliminar el amigo", "warning");
+      } catch (error) {
+        this.mostrarAlertaMensaje(
+          "Ha ocurrido un error eliminado el amigo",
+          "error"
+        );
+      }
+    },
+  },
+};
+</script>
+
+<style scoped>
+.center {
+  text-align: center;
+  margin-top: 3em;
+  margin-bottom: 2em;
+}
+.container {
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.boton-eliminar {
+  background-color: #ef1c1c;
+}
+h2 {
+  font-size: 26px;
+  margin: 20px 0;
+  text-align: center;
+}
+h2 small {
+  font-size: 0.5em;
+}
+.tabla-estilos li {
+  border-radius: 3px;
+  padding: 25px 30px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 25px;
+}
+.amigos {
+  color: #0abb45;
+}
+.tabla-estilos .table-header {
+  background-color: #1a81ff;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #fff;
+}
+.tabla-estilos .table-row {
+  background-color: #ffffff;
+  box-shadow: 0px 0px 9px 0px rgba(0, 0, 0, 0.1);
+}
+.tabla-estilos .columna-1 {
+  flex-basis: 10%;
+}
+.tabla-estilos .columna-2 {
+  flex-basis: 40%;
+}
+.tabla-estilos .columna-3 {
+  flex-basis: 25%;
+}
+.tabla-estilos .columna-4 {
+  flex-basis: 25%;
+}
+@media (max-width: 767px) {
+  .tabla-estilos .table-header {
+    display: none;
+  }
+  .tabla-estilos li {
+    display: block;
+  }
+  .tabla-estilos .columna {
+    flex-basis: 100%;
+  }
+  .tabla-estilos .columna {
+    display: flex;
+    padding: 10px 0;
+  }
+  .tabla-estilos .columna:before {
+    color: #6c7a89;
+    padding-right: 10px;
+    content: attr(data-label);
+    flex-basis: 50%;
+    text-align: right;
+  }
+}
+</style>
